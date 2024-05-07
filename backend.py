@@ -1,12 +1,9 @@
-import os
-os.environ['DISPLAY'] = ':0'
 import webbrowser
 import pywhatkit
 import requests
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from googletrans import Translator
-import csv
 import logging
 from flask import send_file
 from fuzzywuzzy import fuzz
@@ -158,20 +155,11 @@ def get_country_info(country_name):
     else:
         return "Sorry, I couldn't fetch information about that country."
 
-def download_image(url, image_path):
-    response = requests.get(url)
-    if response.status_code == 200:
-        with open(image_path, "wb") as file:
-            file.write(response.content)
-        return True
-    else:
-        return False
-
 
 def chatbot_response(user_message):
-    greetings = ["hello", "hi", "hlw", "hii", "hiii", "what's up"]
+    greetings = ["hello", "hi", "hlw", "hii", "hiii", "what's up","hey"]
     user_message_lower = user_message.lower()  # Convert user's message to lowercase
-    abusive_words=["sala","bokachoda","madarchod","vosribala","son of a bitch","bitch","ass hole","fuck u","fuck you","lawra","khankir chala","gudmarani","bahenchod"]
+    abusive_words=["sala","bokachoda","madarchod","vosribala","son of a bitch","bitch","asshole","fuck u","fuck you","lawra","khankir chala","gudmarani","bahenchod"]
     user_message_lower = user_message.lower()  # Convert user's message to lowercase
     
     if user_message_lower.startswith(tuple(greetings)):
@@ -316,9 +304,5 @@ def chatbot():
         logging.error(f"Error: {str(e)}")
         return jsonify({'error': str(e)}), 500
     
-@app.route('/download_qr_code/<filename>')
-def download_qr_code(filename):
-    # Provide a way to download the QR code image
-    return send_file(f"static/download_qr_code/{filename}", as_attachment=True)
 if __name__ == '__main__':
     app.run(debug=True)
