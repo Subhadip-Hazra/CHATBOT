@@ -4,6 +4,7 @@ import requests
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from googletrans import Translator
+import csv
 import logging
 from flask import send_file
 from fuzzywuzzy import fuzz
@@ -26,7 +27,6 @@ def google_search(query):
         return data["items"][0]["snippet"]
     else:
         return "I'm sorry, I couldn't find an answer."
-
 def get_weather(city_name, api_key):
     base_url = "http://api.openweathermap.org/data/2.5/weather"
     params = {
@@ -53,7 +53,14 @@ def get_weather(city_name, api_key):
     else:
         return "Sorry, I couldn't fetch the weather information at the moment."
 
+# Usage example:
+city_name = "Asansol"  # Replace with the desired city name
+api_key = "1befac90c6e79b8eb85e2977a3bb5c61"  # Replace with your OpenWeatherMap API key
+
+weather_report = get_weather(city_name, api_key)
+
 def get_news_summaries(location):
+    # Use the location parameter to fetch news using the NewsAPI
     api_key = '99f38cf5243e4d2197f9d006ffeddcff'
     url = f"https://newsapi.org/v2/top-headlines?country={location}&apiKey={api_key}"
     response = requests.get(url)
@@ -72,7 +79,6 @@ def solve_math_problem(query):
         return f"The result of {query} is {result}"
     except Exception as e:
         return "Sorry, I couldn't solve that mathematical problem."   
-
 def get_nasa_image_of_the_day():
     api_key = "kIErSunsaJNqBsVK3dhLh3MgrtbkH68ZathXsKPt"
     base_url = f"https://api.nasa.gov/planetary/apod?api_key={api_key}"
@@ -86,7 +92,6 @@ def get_nasa_image_of_the_day():
         return image_url, explanation
     else:
         return None
-
 def get_dad_joke():
     url = "https://icanhazdadjoke.com/"
     headers = {"Accept": "application/json"}
@@ -99,11 +104,10 @@ def get_dad_joke():
         return joke
     else:
         return "Sorry, I couldn't fetch a dad joke at the moment." 
-
 def get_random_dog_breed():
     base_url = "https://api.thedogapi.com/v1"
     headers = {
-        "x-api-key": "live_1xeiOGbN7709B1soNc7mpqgdAysHuSgehQNZUmmA2ljla8d92hSojAZfXEqUHr7O"
+        "x-api-key": "live_1xeiOGbN7709B1soNc7mpqgdAysHuSgehQNZUmmA2ljla8d92hSojAZfXEqUHr7O"  # Replace with your Dog API key
     }
 
     response = requests.get(f"{base_url}/images/search", headers=headers, params={"mime_types": "jpg,png"})
@@ -118,7 +122,6 @@ def get_random_dog_breed():
         return breed_name, breed_temperament, breed_description, breed_image_url
     else:
         return None, None, None, None
-
 def get_country_info(country_name):
     api_url = f"https://restcountries.com/v2/name/{country_name}"
     
@@ -155,16 +158,16 @@ def get_country_info(country_name):
     else:
         return "Sorry, I couldn't fetch information about that country."
 
-
+# Modify the chatbot_response function to use the new function
 def chatbot_response(user_message):
-    greetings = ["hello", "hi", "hlw", "hii", "hiii", "what's up","hey"]
+    greetings = ["hello", "hi", "hlw", "hii", "hiii", "what's up"]
     user_message_lower = user_message.lower()  # Convert user's message to lowercase
-    abusive_words=["sala","bokachoda","madarchod","vosribala","son of a bitch","bitch","asshole","fuck u","fuck you","lawra","khankir chala","gudmarani","bahenchod"]
+    abusive_words=["sala","bokachoda","madarchod","vosribala","son of a bitch","bitch","ass hole","fuck u","fuck you","lawra","khankir chala","gudmarani","bahenchod"]
     user_message_lower = user_message.lower()  # Convert user's message to lowercase
     
     if user_message_lower.startswith(tuple(greetings)):
         return "Hello! I am your personal assistant. How can I help you today? 😊"
-
+    
     elif "play" in user_message:
         play_query = user_message.split("play", 1)[-1].strip()
         pywhatkit.playonyt(play_query)
@@ -196,7 +199,7 @@ def chatbot_response(user_message):
         news_summaries = get_news_summaries("in")
         return news_summaries
     elif "translate" in user_message:
-        # Check if the query contains "translate" and extract the text to be translated
+    # Check if the query contains "translate" and extract the text to be translated
         translate_query = user_message.split("translate", 1)[-1].strip()    
         if translate_query:
             translation = translator.translate(translate_query, src='en', dest='hi')
@@ -251,6 +254,30 @@ def chatbot_response(user_message):
                 return f"Sorry, I couldn't fetch information about {country_name} at the moment."
         else:
             return "Please specify the name of the country you want to learn about."   
+
+    elif "health advice" in user_message:
+        # Extract the organ for which the user wants health advice
+        organ_keywords = ["brain","heart","lungs","liver","kidneys","stomach","pancreas","intestines","skin","bones","muscles","eyes","ears","reproductive organs male","reproductive organs female","spleen","gallbladder","bladder","thyroid gland","adrenal glands","pituitary gland","blood vessels","lymph nodes","prostate gland male","uterus female","ovaries female","testes male","appendix","ligaments","cartilage","nervous system","respiratory system","blood-forming organs","hypothalamus","basal ganglia","intervertebral discs","pons","dendrites","pineal gland","placenta during pregnancy","adipose tissue brown fat","bile ducts","stratum corneum","vas deferens male reproductive system","corpus luteum female reproductive system","pancreatic islets islets of langerhans","zygote during fertilization","tendons","stratum granulosum","gastrointestinal mucosa","humerus arm bone","esophagus","thymus","blood","bone marrow","joints","teeth","tongue","nails","hair follicles","blood-brain barrier","urethra","nervous system peripheral nerves","skin sebaceous glands","endocrine glands various glands producing hormones","diaphragm","erythrocytes red blood cells"]
+        organ_input = None
+        words = user_message.split()
+        for word in words:
+            if word.lower() in organ_keywords:
+                organ_input = word.lower()
+                break
+
+        if organ_input:
+            # Read health advice from a CSV file
+            with open('health_advice_csv_path', mode='r', newline='', encoding='utf-8') as file:
+                reader = csv.DictReader(file)
+                organ_advice = {row['Organ']: row['Health Advice'] for row in reader}
+            
+            if organ_input in organ_advice:
+                return f"Here is some health advice for {organ_input.capitalize()}:\n{organ_advice[organ_input]}"
+            else:
+                return f"Sorry, I couldn't find health advice for {organ_input} at the moment."
+        else:
+            return "Please specify a specific organ for which you'd like health advice."
+        
     elif "heart rate" in user_message:
         heart_rate_str = user_message.split("heart rate", 1)[-1].strip()
         if heart_rate_str.isdigit():
