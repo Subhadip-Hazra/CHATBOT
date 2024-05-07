@@ -3,4 +3,4 @@ flask-cors==3.0.10
 googletrans==4.0.0rc1
 fuzzywuzzy==0.18.0
 requests==2.26.0
-pywhatkit==5.1.0
+Werkzeug==1.0.1
