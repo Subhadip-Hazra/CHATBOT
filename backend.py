@@ -293,6 +293,11 @@ def chatbot_response(user_message):
             return response
         else:
             return "I didn't understand the request...."
+            
+@app.route('/')
+def index():
+    return 'Welcome to my Flask application!'
+
 
 @app.route('/chatbot', methods=['POST'])
 def chatbot():
