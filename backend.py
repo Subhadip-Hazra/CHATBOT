@@ -1,5 +1,4 @@
 import webbrowser
-import pywhatkit
 import requests
 from flask import Flask, request, jsonify
 from flask_cors import CORS
@@ -168,10 +167,6 @@ def chatbot_response(user_message):
     if user_message_lower.startswith(tuple(greetings)):
         return "Hello! I am your personal assistant. How can I help you today? 😊"
     
-    elif "play" in user_message:
-        play_query = user_message.split("play", 1)[-1].strip()
-        pywhatkit.playonyt(play_query)
-        return f"Playing {play_query}..."
     elif "visit" in user_message:
         words = user_message.split()
         open_index = words.index("visit") if "visit" in words else -1
