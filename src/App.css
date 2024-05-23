@@ -1,0 +1,16 @@
+
+
+/* body{
+    background-color: #1164F4;
+} */
+.input-box{
+    height: 94%;
+}
+/* .logo{
+    mix-blend-mode: multiply;
+
+} */
+::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+}
