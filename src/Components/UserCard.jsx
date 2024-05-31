@@ -6,7 +6,7 @@ const UserCard = ({query}) => {
 
     return (
         <div>
-            <div className="border rounded bg-white p-5 mx-1 mt-6 md:mx-40">
+            <div className="border rounded bg-slate-100 p-5 mx-1 mt-6 md:mx-40">
                     {/* Profile picture and logout button */}
                     <div className="flex gap-4 items-center cursor-pointer mb-3">
                         <div className="flex -space-x-2 overflow-hidden gap-5">
