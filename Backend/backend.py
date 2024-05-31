@@ -5,11 +5,18 @@ from flask_cors import CORS
 from googletrans import Translator
 import csv
 import logging
-from flask import send_file
-from fuzzywuzzy import fuzz
+from pymongo import MongoClient
+import os;
 
 app = Flask(__name__)
 CORS(app)
+
+# MongoDB configuration
+mongo_uri = os.getenv('MONGO_URI', 'your-mongodb-url')
+client = MongoClient(mongo_uri)
+db = client['chatbot']
+chats_collection = db['chats']
+
 
 translator = Translator()
 
@@ -329,6 +336,38 @@ def chatbot():
     except Exception as e:
         logging.error(f"Error: {str(e)}")
         return jsonify({'error': str(e)}), 500
+    
+
+@app.route('/save_chat', methods=['POST'])
+def save_chat():
+    data = request.json
+    user_id = data.get('user_id')
+    query = data.get('query')
+    response = data.get('response')
+    
+    if not user_id or not query or not response:
+        return jsonify({'error': 'Missing data'}), 400
+    
+    chat_data = {
+        'user_id': user_id,
+        'query': query,
+        'response': response
+    }
+    
+    result = chats_collection.insert_one(chat_data)
+    return jsonify({'message': 'Chat saved', 'id': str(result.inserted_id)}), 201
+
+@app.route('/get_history/<user_id>', methods=['GET'])
+def get_history(user_id):
+    history = chats_collection.find({'user_id': user_id}).limit(4) # First 4 headers
+    history_list = [{'id': str(chat['_id']), 'query': chat['query'], 'response': chat['response']} for chat in history]
+    return jsonify(history_list), 200
+
+@app.route('/get_all_history/<user_id>', methods=['GET'])
+def get_all_history(user_id):
+    history = chats_collection.find({'user_id': user_id})
+    history_list = [{'id': str(chat['_id']), 'query': chat['query'], 'response': chat['response']} for chat in history]
+    return jsonify(history_list), 200
     
 if __name__ == '__main__':
     app.run(debug=True,host='0.0.0.0', port=5000)
